@@ -12,14 +12,22 @@ function insertUser(req, res) {
         res.status(400).json();
     }
     else {
-        var insert = {
-            "userId": req.body.userId,
-            "userName": req.body.userName,
-            "balance": 0
-        };
-        db.collection("user").insertOne(insert, function (err, result) {
+        db.collection("user").find({ "userId": req.body.userId }).toArray(function (err, result) {
             if (err) throw err;
-            res.json(result.ops);
+            if (result[0] == null) {
+                var insert = {
+                    "userId": req.body.userId,
+                    "userName": req.body.userName,
+                    "balance": 0
+                };
+                db.collection("user").insertOne(insert, function (err, result) {
+                    if (err) throw err;
+                    res.json(result.ops);
+                });
+            }
+            else {
+                res.send('This user id is taken.');
+            }
         });
     }
 };
