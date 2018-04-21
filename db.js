@@ -8,7 +8,6 @@ MongoClient.connect(url, function (err, database) {
 });
 
 function insertUser(req, res) {
-    console.log(req.body);
     if (req.body.userId == undefined || req.body.userName == undefined) {
         res.status(400).json();
     }
@@ -16,7 +15,7 @@ function insertUser(req, res) {
         var insert = {
             "userId": req.body.userId,
             "userName": req.body.userName,
-            "balance": "0"
+            "balance": 0
         };
         db.collection("user").insertOne(insert, function (err, result) {
             if (err) throw err;
@@ -25,29 +24,42 @@ function insertUser(req, res) {
     }
 };
 
-function insertPayment(req, res) {
-    if (req.body.userId == undefined || req.body.productId == undefined || req.body.webName == undefined || req.body.price == undefined || req.body.amount == undefined) {
-        res.status(400).json();
-    }
-    else {
-        var insert = {
-            "userId": req.body.userId,
-            "productId": req.body.productId,
-            "webName": req.body.webName,
-            "price": req.body.price,
-            "amount": req.body.amount
-        };
-        db.collection("payment").insertOne(insert, function (err, result) {
-            if (err) throw err;
-            res.json(result.ops);
-        });
-    }
+function insertPaymentBill(req, res) {
+    var userId = req.body.userId;
+    var productId = req.body.productId;
+    var webName = req.body.webName;
+    var price = req.body.price;
+    var amount = req.body.amount;
+    db.collection("user").find({ "userId": userId }).toArray(function (err, result) {
+        if (err) throw err;
+        if (result[0] == null) {
+            res.status(404).json();
+        }
+        else {
+            if (userId == undefined || productId == undefined || webName == undefined || price == undefined || amount == undefined) {
+                res.status(400).json();
+            }
+            else {
+                var insert = {
+                    "userId": userId,
+                    "productId": productId,
+                    "webName": webName,
+                    "price": price,
+                    "amount": amount
+                };
+                db.collection("payment").insertOne(insert, function (err, result) {
+                    if (err) throw err;
+                    payment(userId, price * amount);
+                    res.json(result.ops);
+                });
+            }
+        }
+    });
 };
 
 function findAllUser(req, res) {
     db.collection("user").find({}).toArray(function (err, result) {
         if (err) throw err;
-        console.log(result);
         res.json(result);
     });
 };
@@ -55,14 +67,70 @@ function findAllUser(req, res) {
 function findAllPayment(req, res) {
     db.collection("payment").find({}).toArray(function (err, result) {
         if (err) throw err;
-        console.log(result);
         res.json(result);
     });
 };
 
+function findPaymentByUserId(req, res) {
+    var userId = req.params.userId
+    db.collection("payment").find({ "userId": userId }).toArray(function (err, result) {
+        if (err) throw err;
+        res.json(result);
+    });
+};
+
+function findUser(req, res) {
+    var userId = req.params.userId
+    db.collection("user").find({ "userId": userId }).toArray(function (err, result) {
+        if (err) throw err;
+        if (result[0] == null) {
+            res.status(404).json();
+        }
+        else {
+            res.json(result);
+        }
+    });
+};
+
+function increaseBalance(req, res) {
+    var userId = req.params.userId
+    var amount = req.params.amount
+    db.collection("user").find({ "userId": userId }).toArray(function (err, result) {
+        if (err) throw err;
+        if (result[0] == null) {
+            res.status(404).json();
+        }
+        else {
+            amount = + parseInt(amount) + result[0].balance
+            db.collection("user").updateOne({ "userId": userId }, { $set: { "balance": amount } }, function (err, result) {
+                if (err) throw err;
+                res.json(result);
+            });
+        };
+    });
+}
+
+function payment(userId, amount) {
+    db.collection("user").find({ "userId": userId }).toArray(function (err, result) {
+        if (err) throw err;
+        if (result[0].balance < amount) {
+            res.send('balance not enough');
+        }
+        else {
+            amount = result[0].balance - amount;
+            db.collection("user").updateOne({ "userId": userId }, { $set: { "balance": amount } }, function (err, result) {
+                if (err) throw err;
+            });
+        }
+    });
+}
+
 module.exports = {
     insertUser: insertUser,
-    insertPayment: insertPayment,
+    insertPaymentBill: insertPaymentBill,
     findAllUser: findAllUser,
-    findAllPayment:findAllPayment
+    findAllPayment: findAllPayment,
+    findUser: findUser,
+    findPaymentByUserId:findPaymentByUserId,
+    increaseBalance: increaseBalance
 };

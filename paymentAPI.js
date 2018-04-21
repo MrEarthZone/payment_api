@@ -10,11 +10,16 @@ app.use(bodyParser.json());
 app.get('/', function (req, res) {
     res.send('Welcome to payment API');
 });
-app.get('/api/payment/all', db.findAllPayment);
-app.get('/api/user/all', db.findAllUser);
 
-app.post('/api/payment/new', db.insertPayment);
+app.get('/api/payment', db.findAllPayment);
+app.get('/api/user', db.findAllUser);
+app.get('/api/user/:userId', db.findUser);
+app.get('/api/payment/:userId', db.findPaymentByUserId);
+
+app.post('/api/payment/new', db.insertPaymentBill);
 app.post('/api/user/new', db.insertUser);
+
+app.get('/api/balance/:userId/increase/:amount', db.increaseBalance);
 
 app.listen(port);
 console.log('Run on port:' + port);
