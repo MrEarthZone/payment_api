@@ -16,7 +16,7 @@ app.get('/api/user', db.findAllUser);
 app.get('/api/user/:userId', db.findUser);
 app.get('/api/payment/:userId', db.findPaymentByUserId);
 
-app.post('/api/payment/new', db.insertPaymentBill);
+app.post('/api/payment/new', db.insertPayment);
 app.post('/api/user/new', db.insertUser);
 
 app.get('/api/balance/:userId/increase/:amount', db.increaseBalance);

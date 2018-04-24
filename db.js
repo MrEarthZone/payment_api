@@ -32,7 +32,7 @@ function insertUser(req, res) {
     }
 };
 
-function insertPaymentBill(req, res) {
+function insertPayment(req, res) {
     var userId = req.body.userId;
     var productId = req.body.productId;
     var webName = req.body.webName;
@@ -55,10 +55,19 @@ function insertPaymentBill(req, res) {
                     "price": price,
                     "amount": amount
                 };
-                db.collection("payment").insertOne(insert, function (err, result) {
-                    if (err) throw err;
-                    payment(userId, price * amount);
-                    res.json(result.ops);
+                var net = price*amount;
+                db.collection("user").find({ "userId": userId }).toArray(function (err, result) {
+                    if (result[0].balance < net) {
+                        res.send('balance not enough');
+                    }
+                    else {
+                        db.collection("payment").insertOne(insert, function (err, result) {
+                            res.json(result.ops);
+                        });
+                        balance = result[0].balance - net;
+                        db.collection("user").updateOne({ "userId": userId }, { $set: { "balance": balance } }, function (err, result) {
+                        });
+                    }
                 });
             }
         }
@@ -118,27 +127,12 @@ function increaseBalance(req, res) {
     });
 }
 
-function payment(userId, amount) {
-    db.collection("user").find({ "userId": userId }).toArray(function (err, result) {
-        if (err) throw err;
-        if (result[0].balance < amount) {
-            res.send('balance not enough');
-        }
-        else {
-            amount = result[0].balance - amount;
-            db.collection("user").updateOne({ "userId": userId }, { $set: { "balance": amount } }, function (err, result) {
-                if (err) throw err;
-            });
-        }
-    });
-}
-
 module.exports = {
     insertUser: insertUser,
-    insertPaymentBill: insertPaymentBill,
+    insertPayment: insertPayment,
     findAllUser: findAllUser,
     findAllPayment: findAllPayment,
     findUser: findUser,
-    findPaymentByUserId:findPaymentByUserId,
+    findPaymentByUserId: findPaymentByUserId,
     increaseBalance: increaseBalance
 };
