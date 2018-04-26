@@ -121,7 +121,7 @@ function increaseBalance(req, res) {
             amount = + parseInt(amount) + result[0].balance
             db.collection("user").updateOne({ "userId": userId }, { $set: { "balance": amount } }, function (err, result) {
                 if (err) throw err;
-                res.json(result);
+                res.send('success');
             });
         };
     });
