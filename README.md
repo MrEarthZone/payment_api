@@ -19,4 +19,4 @@ json form request : {"userId":"[id]","userName":"[name]"}
 
 - Insert payment (POST) https://api-payment.herokuapp.com/api/payment/new
 
-json form request : {"userId":"[id]","productId":"[product id]","webName":[web name],"price": [price],"amount": [amount]}
+json form request : {"userId":"[id]","productId":"[product id]","webName":"[web name]","price": [price],"amount": [amount]}
