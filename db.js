@@ -37,6 +37,7 @@ function insertPayment(req, res) {
     var orderId = req.body.orderId;
     var webName = req.body.webName;
     var price = req.body.price;
+    var date = Date;
     db.collection("user").find({ "userId": userId }).toArray(function (err, result) {
         if (err) throw err;
         if (result[0] == null) {
@@ -52,7 +53,7 @@ function insertPayment(req, res) {
                     "orderId": orderId,
                     "webName": webName,
                     "price": price,
-                    "dateTime" : Date
+                    "dateTime" : date
                 };
                 db.collection("user").find({ "userId": userId }).toArray(function (err, result) {
                     if (result[0].balance < price) {
