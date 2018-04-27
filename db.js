@@ -51,7 +51,8 @@ function insertPayment(req, res) {
                     "userId": userId,
                     "orderId": orderId,
                     "webName": webName,
-                    "price": price
+                    "price": price,
+                    "date" : Date
                 };
                 db.collection("user").find({ "userId": userId }).toArray(function (err, result) {
                     if (result[0].balance < price) {
