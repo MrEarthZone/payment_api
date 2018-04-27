@@ -53,16 +53,15 @@ function insertPayment(req, res) {
                     "webName": webName,
                     "price": price
                 };
-                var net = price * amount;
                 db.collection("user").find({ "userId": userId }).toArray(function (err, result) {
-                    if (result[0].balance < net) {
+                    if (result[0].balance < price) {
                         res.send('balance not enough');
                     }
                     else {
                         db.collection("payment").insertOne(insert, function (err, result) {
                             res.json(result.ops);
                         });
-                        balance = result[0].balance - net;
+                        balance = result[0].balance - price;
                         db.collection("user").updateOne({ "userId": userId }, { $set: { "balance": balance } }, function (err, result) {
                         });
                     }
