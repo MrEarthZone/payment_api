@@ -37,7 +37,7 @@ function insertPayment(req, res) {
     var orderId = req.body.orderId;
     var webName = req.body.webName;
     var price = req.body.price;
-    var date = Date;
+    var date = new Date();
     db.collection("user").find({ "userId": userId }).toArray(function (err, result) {
         if (err) throw err;
         if (result[0] == null) {
