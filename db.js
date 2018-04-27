@@ -34,28 +34,26 @@ function insertUser(req, res) {
 
 function insertPayment(req, res) {
     var userId = req.body.userId;
-    var productId = req.body.productId;
+    var orderId = req.body.orderId;
     var webName = req.body.webName;
     var price = req.body.price;
-    var amount = req.body.amount;
     db.collection("user").find({ "userId": userId }).toArray(function (err, result) {
         if (err) throw err;
         if (result[0] == null) {
             res.status(404).json();
         }
         else {
-            if (userId == undefined || productId == undefined || webName == undefined || price == undefined || amount == undefined) {
+            if (userId == undefined || orderId == undefined || webName == undefined || price == undefined) {
                 res.status(400).json();
             }
             else {
                 var insert = {
                     "userId": userId,
-                    "productId": productId,
+                    "orderId": orderId,
                     "webName": webName,
-                    "price": price,
-                    "amount": amount
+                    "price": price
                 };
-                var net = price*amount;
+                var net = price * amount;
                 db.collection("user").find({ "userId": userId }).toArray(function (err, result) {
                     if (result[0].balance < net) {
                         res.send('balance not enough');
@@ -121,7 +119,15 @@ function increaseBalance(req, res) {
             amount = + parseInt(amount) + result[0].balance
             db.collection("user").updateOne({ "userId": userId }, { $set: { "balance": amount } }, function (err, result) {
                 if (err) throw err;
-                res.send('success');
+                db.collection("user").find({ "userId": userId }).toArray(function (err, result) {
+                    if (err) throw err;
+                    if (result[0] == null) {
+                        res.status(404).json();
+                    }
+                    else {
+                        res.json(result);
+                    }
+                });
             });
         };
     });
