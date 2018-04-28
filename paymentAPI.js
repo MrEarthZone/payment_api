@@ -1,11 +1,13 @@
 var express = require('express');
 var app = express();
+var cors = require('cors');
 var db = require('./db.js');
 var bodyParser = require('body-parser');
 var port = process.env.PORT || 8080;
 
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
+app.use(cors());
 
 app.get('/', function (req, res) {
     res.send('Welcome to payment API');
